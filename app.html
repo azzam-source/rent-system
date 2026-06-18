@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>نظام الإيجارات — Azzam</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root{
+--ink:#0B0F2E;--lav:#6C5CE7;--lav2:#8B7CF6;--sky:#0EA5E9;--navy:#1E3A8A;
+--bg:#F0F0F0;--white:#fff;--bdr:#BBBBBB;
+--txt:#0A0A0A;--txt2:#111111;--txt3:#333333;
+--ok:#059669;--err:#DC2626;--warn:#D97706;
+--room-bg:#DBEAFE;--room-b:#1E40AF;--room-t:#1E3A8A;
+--apt-bg:#DCFCE7;--apt-b:#15803D;--apt-t:#14532D;
+--shop-bg:#FEF3C7;--shop-b:#92400E;--shop-t:#78350F;
+--r:10px;
+}
+body.dk{--bg:#0D0C1E;--white:#1C1A2E;--bdr:#2A2650;--txt:#E8E4FF;--txt2:#B8B0E8;--txt3:#7876A0;--room-bg:#0F1A3A;--room-b:#3B5BDB;--room-t:#93C5FD;--apt-bg:#0A2218;--apt-b:#2D6A4F;--apt-t:#6EE7B7;--shop-bg:#1C1209;--shop-b:#92400E;--shop-t:#FCD34D;}
+body.dk .card-t{color:#E8E4FF!important}
+body.dk .f label{color:#E8E4FF!important}
+body.dk .f input,body.dk .f select,body.dk .f textarea{background:#0F0E1F!important;color:#E8E4FF!important;border-color:#2A2650!important}
+body.dk .f input[readonly]{background:#0A0918!important;color:#9896B8!important}
+body.dk .tbl td{color:#E8E4FF!important}
+body.dk .sc{background:#1C1A2E!important;border-color:#2A2650!important}
+body.dk .sc-lbl{color:#B8B0E8!important}
+body.dk .card{background:#1C1A2E!important;border-color:#2A2650!important}
+body.dk .tb-title{color:#E8E4FF!important}
+body.dk .tb-hj{color:#E8E4FF!important}
+body.dk .tb-gr{color:#9896B8!important}
+body.dk .topbar{background:#1C1A2E!important;border-color:#2A2650!important}
+body.dk .rb{background:#1C1A2E!important;color:#B8B0E8!important;border-color:#2A2650!important}
+body.dk .rb.on{background:linear-gradient(90deg,#6C5CE7,#8B7CF6)!important;color:#fff!important}
+body.dk .btn-sm{background:#1C1A2E!important;color:#B8B0E8!important;border-color:#2A2650!important}
+body.dk .modal{background:#1C1A2E!important;border-color:#2A2650!important}
+body.dk .sbar input,body.dk .sbar select{background:#1C1A2E!important;color:#E8E4FF!important;border-color:#2A2650!important}
+body.dk .fc{background:#1C1A2E!important;border-color:#2A2650!important}
+body.dk .fc.room{border-top-color:#3B5BDB!important}
+body.dk .fc.apt{border-top-color:#2D6A4F!important}
+body.dk .fc.shop{border-top-color:#92400E!important}
+body.dk .sc-val.g{color:#34D399!important}
+body.dk .sc-val.r{color:#F87171!important}
+body.dk .sc-val.b{color:#60A5FA!important}
+body.dk .sc-val.w{color:#FBBF24!important}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Times New Roman',serif;font-weight:700}
+body{background:var(--bg);color:#000000;min-height:100vh;font-size:17px;font-weight:900}
+/* Layout */
+.wrap{display:flex;min-height:100vh}
+.sb{width:210px;background:linear-gradient(170deg,#07091E,#0F1340,#0C1E6B);position:fixed;inset:0 0 0 auto;display:flex;flex-direction:column;z-index:100;transition:width .25s}
+.sb.hidden{width:0;overflow:hidden}
+.main{transition:margin-right .25s}
+.main.expanded{margin-right:0!important}
+.sb-logo{padding:20px 16px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-ico{width:40px;height:40px;background:linear-gradient(135deg,var(--lav),var(--sky));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:6px}
+.sb-t{font-size:14px;font-weight:800;color:#fff}.sb-s{font-size:10px;color:rgba(255,255,255,.3)}
+.sb-nav{flex:1;padding:8px 6px;overflow-y:auto}
+.ni{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:8px;cursor:pointer;color:rgba(255,255,255,.8);font-size:15px;font-weight:900;margin-bottom:2px;border:none;background:none;width:100%;text-align:right;transition:all .15s}
+.ni:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.8)}
+.ni.on{background:linear-gradient(90deg,var(--lav),var(--lav2));color:#fff;box-shadow:0 3px 12px rgba(108,92,231,.4)}
+.ni-ico{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.ni-bdg{margin-right:auto;background:var(--err);color:#fff;font-size:9px;padding:1px 5px;border-radius:20px;font-weight:800}
+.sb-ft{padding:10px;border-top:1px solid rgba(255,255,255,.07)}
+.sb-user{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.sb-av{width:32px;height:32px;background:linear-gradient(135deg,var(--lav),var(--sky));border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0}
+.sb-nm{font-size:13px;font-weight:800;color:rgba(255,255,255,.75)}.sb-rl{font-size:10px;color:rgba(255,255,255,.3)}
+.sb-btns{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.sbb{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:rgba(255,255,255,.5);font-size:10px;padding:5px 3px;cursor:pointer;text-align:center;font-weight:700}
+.sbb:hover{color:#fff;background:rgba(255,255,255,.12)}
+.main{margin-right:210px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--white);border-bottom:1px solid var(--bdr);padding:11px 22px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 1px 8px rgba(108,92,231,.07)}
+.tb-title{font-size:20px;font-weight:900;color:#000000}
+.tb-right{display:flex;align-items:center;gap:8px}
+.tb-dates{text-align:left}
+.tb-hj{font-size:17px;font-weight:900;color:#000000;letter-spacing:.3px}
+.tb-gr{font-size:15px;color:#111111;font-weight:900}
+.dk-btn{background:var(--bg);border:1.5px solid var(--bdr);border-radius:20px;padding:4px 11px;cursor:pointer;font-size:12px;color:var(--txt2);font-weight:700;display:flex;align-items:center;gap:4px}
+.content{padding:18px 22px;flex:1}
+.pane{display:none}.pane.on{display:block}
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px}
+.sc{background:var(--white);border-radius:var(--r);padding:14px 16px 16px;border:1px solid var(--bdr);box-shadow:0 2px 10px rgba(108,92,231,.06);position:relative;overflow:hidden}
+.sc-lbl{font-size:15px;color:#111111;margin-bottom:10px;font-weight:900;letter-spacing:.2px;padding-left:40px}
+.sc-val{font-size:18px;font-weight:900;direction:ltr;display:block}
+.sc-val.g{color:var(--ok)}.sc-val.b{color:var(--sky)}.sc-val.r{color:var(--err)}.sc-val.w{color:var(--warn)}.sc-val.p{color:var(--lav)}
+.sc-ico{position:absolute;top:8px;left:12px;font-size:26px;opacity:.85}
+/* Card */
+.card{background:var(--white);border-radius:var(--r);border:1px solid var(--bdr);box-shadow:0 2px 10px rgba(108,92,231,.06);padding:16px 20px;margin-bottom:12px}
+.card-t{font-size:18px;font-weight:900;color:#000000;margin-bottom:14px;display:flex;align-items:center;gap:5px;letter-spacing:.2px}
+.card-t::before{content:'';width:3px;height:12px;background:linear-gradient(var(--lav),var(--sky));border-radius:2px}
+/* Grid */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:9px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:9px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:9px}
+/* Form */
+.f label{font-size:18px;font-weight:900;color:#000000;display:block;margin-bottom:6px;letter-spacing:.1px;white-space:nowrap}
+.f input,.f select,.f textarea{width:100%;background:#ffffff;border:2px solid #cccccc;border-radius:8px;padding:10px 12px;font-size:25px;font-weight:900;color:#000000;outline:none;transition:border .15s}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--lav);box-shadow:0 0 0 3px rgba(108,92,231,.1)}
+.f input[readonly]{background:var(--bg);opacity:.7;cursor:default}
+.f textarea{height:50px;resize:none}
+body.dk .f input,body.dk .f select,body.dk .f textarea{background:#0F0E1F;color:var(--txt)}
+/* Hint */
+.hint{font-size:11px;padding:5px 9px;border-radius:6px;margin-top:3px;font-weight:700;display:none}
+.hint.ok{background:#EFF6FF;color:var(--room-t)}.hint.err{background:#FEF2F2;color:var(--err)}
+body.dk .hint.ok{background:#0F1A3A}.body.dk .hint.err{background:#2D1515}
+/* Renewal */
+.rbs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px}
+.rb{padding:8px 18px;font-size:15px;font-weight:900;cursor:pointer;border:2px solid #999;border-radius:20px;background:#ffffff;color:#000000;transition:all .15s}
+.rb.on{background:#111111;color:#fff;border-color:#111111;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.rb:hover:not(.on){border-color:var(--lav);color:var(--lav)}
+.cm{display:none;align-items:center;gap:7px;margin-bottom:9px;background:var(--bg);padding:6px 10px;border-radius:8px}
+.cm.show{display:flex}.cm input{width:65px}
+/* Info box */
+.ib{border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;margin-bottom:9px;display:none;border:1px solid}
+.ib.bl{background:#EFF6FF;color:var(--room-t);border-color:var(--room-b)}
+.ib.yl{background:#FFFBEB;color:var(--warn);border-color:#FCD34D}
+body.dk .ib.bl{background:#0F1A3A}.body.dk .ib.yl{background:#2D2010}
+/* Buttons */
+.btn{background:#111111;color:#ffffff;border:none;border-radius:8px;padding:10px 20px;font-size:16px;font-weight:900;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s}
+.btn:hover{opacity:.88;transform:translateY(-1px)}
+.btn-full{width:100%;justify-content:center}
+.btn-sky{background:linear-gradient(90deg,var(--sky),#38BDF8)}
+.btn-out{background:var(--white);color:var(--lav);border:1.5px solid var(--lav)}
+body.dk .btn-out{background:var(--white)}
+.btn-sm{font-size:13px;padding:5px 10px;border-radius:5px;cursor:pointer;border:1.5px solid #999;background:#ffffff;color:#000000;font-weight:800}
+.btn-sm:hover{border-color:var(--lav);color:var(--lav)}
+.btn-del{font-size:11px;padding:3px 8px;border-radius:5px;cursor:pointer;border:1px solid #FECACA;background:#FEF2F2;color:var(--err);font-weight:700}
+.btn-wa{background:#25D366;color:#fff;border:none;border-radius:5px;padding:3px 8px;font-size:11px;cursor:pointer;font-weight:700}
+/* Msg */
+.msg{border-radius:8px;padding:8px 12px;font-size:13px;font-weight:700;margin-bottom:9px;display:none}
+.msg.ok{background:#ECFDF5;color:var(--ok);border:1px solid #6EE7B7}
+.msg.err{background:#FEF2F2;color:var(--err);border:1px solid #FECACA}
+/* Table */
+.tw{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl thead tr{background:linear-gradient(90deg,#07091E,#0F1340)}
+.tbl th{text-align:right;padding:10px 12px;color:#ffffff;font-weight:900;font-size:15px;white-space:nowrap}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--bdr);font-weight:800;vertical-align:middle;color:#000000;font-size:15px}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tbody tr:hover{background:var(--bg);cursor:pointer}
+/* Type badges & row colors */
+.t-r{background:var(--room-bg);color:var(--room-t);border:1px solid var(--room-b);display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:800}
+.t-a{background:var(--apt-bg);color:var(--apt-t);border:1px solid var(--apt-b);display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:800}
+.t-s{background:var(--shop-bg);color:var(--shop-t);border:1px solid var(--shop-b);display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:800}
+.row-r td:first-child{border-right:3px solid var(--room-b)}
+.row-a td:first-child{border-right:3px solid var(--apt-b)}
+.row-s td:first-child{border-right:3px solid var(--shop-b)}
+/* Status badges */
+.bdg{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:800}
+.bdg-ok{background:#D1FAE5;color:#065F46}.bdg-err{background:#FEE2E2;color:#991B1B}
+.bdg-warn{background:#FEF3C7;color:#92400E}.bdg-info{background:#DBEAFE;color:#1E40AF}
+.bdg-lav{background:#EDE9FF;color:var(--lav)}
+/* Search bar */
+.sbar{display:flex;gap:6px;margin-bottom:11px;flex-wrap:wrap}
+.sbar input,.sbar select{flex:1;min-width:100px;background:var(--white);border:1.5px solid var(--bdr);border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;color:var(--txt);outline:none}
+.sbar input:focus,.sbar select:focus{border-color:var(--lav)}
+/* Alert cards */
+.ac{border-radius:8px;padding:9px 13px;margin-bottom:6px;display:flex;align-items:center;gap:9px;border:1px solid}
+.ac.red{background:#FEF2F2;border-color:#FECACA}
+.ac.yl{background:#FFFBEB;border-color:#FCD34D}
+/* Empty */
+.empty{text-align:center;padding:2rem;color:var(--txt3)}
+/* Modal */
+.mbg{display:none;position:fixed;inset:0;background:rgba(7,9,30,.65);z-index:300;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.mbg.show{display:flex}
+.modal{background:var(--white);border-radius:14px;padding:22px;width:92%;max-width:520px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);border:1px solid var(--bdr)}
+.mhdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.mttl{font-size:15px;font-weight:900}.mx{cursor:pointer;font-size:17px;color:var(--txt3);width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--bg)}
+.mft{display:flex;gap:7px;margin-top:14px}
+/* Week banner */
+.wbanner{display:none;background:linear-gradient(90deg,var(--warn),#F59E0B);color:#fff;padding:10px 24px;font-size:14px;font-weight:800;cursor:pointer;width:100%;text-align:right}
+/* Success anim */
+.sa{display:none;position:fixed;inset:0;pointer-events:none;z-index:9000;align-items:center;justify-content:center}
+.sa-in{background:linear-gradient(135deg,#059669,#34D399);color:#fff;border-radius:16px;padding:20px 34px;text-align:center;transform:scale(0);transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .3s;opacity:0;box-shadow:0 14px 40px rgba(5,150,105,.45)}
+/* Receipt */
+.rh{background:linear-gradient(135deg,var(--ink),var(--navy));color:#fff;padding:20px;border-radius:11px 11px 0 0;text-align:center}
+.rrow{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--bdr);font-size:13px}
+.rrow:last-child{border-bottom:none}
+.rtot{background:linear-gradient(90deg,#EDE9FF,#E0F2FE);border-radius:8px;padding:12px 16px;margin:12px 0;display:flex;justify-content:space-between;align-items:center}
+.rstamp{display:inline-flex;align-items:center;justify-content:center;width:68px;height:68px;border-radius:50%;border:3px solid;font-size:11px;font-weight:900;transform:rotate(-15deg)}
+/* Chart */
+.cw{position:relative;height:180px;margin:6px 0}
+/* Kashf */
+.ks{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px}
+.kc{border-radius:8px;padding:12px 14px;text-align:center}
+.kc-l{font-size:10px;font-weight:800;margin-bottom:3px;letter-spacing:.3px}
+.kc-v{font-size:20px;font-weight:900;direction:ltr}
+/* File cards grid */
+.fg{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.fc{background:var(--white);border-radius:var(--r);border:1px solid var(--bdr);padding:18px 20px;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.fc .fc-name{font-size:20px!important;font-weight:900!important;color:#000!important}
+.fc .fc-type{font-size:14px!important;padding:4px 12px!important}
+.fc .fc-unit{font-size:22px!important;font-weight:900!important;width:56px!important;height:56px!important}
+.fc .fc-lbl{font-size:14px!important;font-weight:800!important;color:#444!important}
+.fc .fc-val{font-size:18px!important;font-weight:900!important}
+.fc:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(108,92,231,.15)}
+.fc.room{border-top:3px solid var(--room-b)}.fc.apt{border-top:3px solid var(--apt-b)}.fc.shop{border-top:3px solid var(--shop-b)}
+/* Tenant file modal */
+.tfh{border-radius:10px;padding:16px;margin-bottom:12px;color:#fff}
+.tfh.room{background:linear-gradient(135deg,#1D4ED8,#3B82F6)}
+.tfh.apt{background:linear-gradient(135deg,#0E7490,#06B6D4)}
+.tfh.shop{background:linear-gradient(135deg,#4C1D95,#7C3AED)}
+.tl{border-right:3px solid var(--lav);padding-right:14px;margin-right:8px}
+.tlitem{position:relative;margin-bottom:10px;background:var(--bg);border-radius:8px;padding:9px 12px;border:1px solid var(--bdr)}
+.tldot{width:10px;height:10px;background:var(--lav);border-radius:50%;position:absolute;right:-9px;top:6px}
+@media print{body>*:not(#pArea){display:none!important}.np{display:none!important}*{-webkit-print-color-adjust:exact!important}}
+</style>
+</head>
+<body>
+
+<div class="sa" id="sa"><div class="sa-in" id="sain"><div style="font-size:40px;margin-bottom:5px">✅</div><div style="font-size:16px;font-weight:900" id="samsg"></div><div style="font-size:12px;opacity:.8;margin-top:2px" id="sasub"></div></div></div>
+
+<div class="wrap">
+<aside class="sb">
+  <div class="sb-logo">
+    <div class="sb-ico">🏢</div>
+    <div class="sb-t">نظام الإيجارات</div>
+    <div class="sb-s">إدارة وتحصيل متكاملة</div>
+  </div>
+  <nav class="sb-nav">
+    <button class="ni on" onclick="go('reg')"><span class="ni-ico">💳</span><span>تسجيل سند</span></button>
+    <button class="ni" onclick="go('kashf')"><span class="ni-ico">📊</span><span>الكشف الشهري</span></button>
+    <button class="ni" onclick="go('files')"><span class="ni-ico">🗂️</span><span>ملفات المستأجرين</span></button>
+    <button class="ni" onclick="go('log')"><span class="ni-ico">📋</span><span>سجل الدفعات</span></button>
+    <button class="ni" onclick="go('ten')"><span class="ni-ico">👥</span><span>المستأجرون</span></button>
+    <button class="ni" onclick="go('due')"><span class="ni-ico">⚠️</span><span>المتأخرون</span><span class="ni-bdg" id="dBdg" style="display:none">0</span></button>
+    <button class="ni" onclick="go('alert')"><span class="ni-ico">🔔</span><span>التنبيهات</span></button>
+    <button class="ni" onclick="go('report')"><span class="ni-ico">📈</span><span>التقارير</span></button>
+    <button class="ni" onclick="go('archive')"><span class="ni-ico">🗄️</span><span>الأرشيف</span></button>
+    <button class="ni" onclick="openRst()"><span class="ni-ico">🔄</span><span>ريستارت</span></button>
+  </nav>
+  <div class="sb-ft">
+    <div class="sb-user">
+      <div class="sb-av">A</div>
+      <div><div class="sb-nm">Azzam</div><div class="sb-rl">موظف التحصيل</div></div>
+    </div>
+    <div class="sb-btns">
+      <button class="sbb" onclick="expBak()">💾 نسخ</button>
+      <label class="sbb" style="cursor:pointer">📂 استيراد<input type="file" id="impF" accept=".json" style="display:none" onchange="impBak(event)"/></label>
+      <button class="sbb" onclick="toggleDk()"><span id="dico">🌙</span> <span id="dlbl">ليلي</span></button>
+      <button class="sbb" onclick="openGS()">🔗 Sheets</button>
+      <label class="sbb" style="cursor:pointer;grid-column:span 2;background:rgba(14,165,233,.25);border-color:rgba(14,165,233,.4);color:#7DD3FC">📊 استيراد Excel المستأجرين<input type="file" id="xlsxF" accept=".xlsx,.xls,.csv" style="display:none" onchange="impXlsx(event)"/></label>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:12px">
+    <button id="sbToggle" onclick="toggleSb()" style="background:var(--bg);border:2px solid var(--bdr);border-radius:8px;width:38px;height:38px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0">☰</button>
+    <div class="tb-title" id="pgtitle">تسجيل سند جديد</div>
+  </div>
+  <div class="tb-right">
+    <div class="tb-dates"><div class="tb-hj" id="dHj"></div><div class="tb-gr" id="dGr"></div></div>
+    <button class="dk-btn" onclick="toggleDk()"><span id="dico2">🌙</span></button>
+  </div>
+</div>
+<div class="wbanner" id="wb" onclick="go('alert');this.style.display='none'"><span id="wbt"></span> — اضغط للعرض ✕</div>
+<div class="content">
+<div class="stats" id="sts"></div>
+
+<!-- ═══ تسجيل سند ═══ -->
+<div id="reg" class="pane on">
+<div class="card">
+  <div class="card-t">بيانات الدفعة</div>
+  <div class="msg" id="rm"></div>
+  <div class="g2">
+    <div class="f"><label>رقم العقار</label><input id="fU" placeholder="مثال: 70" oninput="fT()"/><div class="hint" id="fH"></div></div>
+    <div class="f"><label>اسم المستأجر</label><input id="fN" readonly/></div>
+  </div>
+  <div class="g4">
+    <div class="f"><label>النوع</label><input id="fTp" readonly/></div>
+    <div class="f"><label>الإيجار ﷼</label><input id="fR" type="number" readonly/></div>
+    <div class="f"><label>المدفوع ﷼</label><input id="fP" type="number" placeholder="0" oninput="cR()"/></div>
+    <div class="f"><label>المتبقي ﷼</label><input id="fRm" type="number" readonly/></div>
+  </div>
+  <div class="g2">
+    <div class="f"><label>تاريخ الدفع</label><input id="fD" type="date"/></div>
+    <div class="f"><label>طريقة الدفع</label><select id="fM"><option>كاش</option><option>تحويل بنكي</option><option>شيك</option><option>مدى</option></select></div>
+  </div>
+  <div class="f" style="margin-bottom:7px"><label>مدة التجديد</label></div>
+  <div class="rbs">
+    <button class="rb on" onclick="sR(1,this)">شهر</button>
+    <button class="rb" onclick="sR(2,this)">شهرين</button>
+    <button class="rb" onclick="sR(3,this)">3 أشهر</button>
+    <button class="rb" onclick="sR(6,this)">6 أشهر</button>
+    <button class="rb" onclick="sR(12,this)">سنة</button>
+    <button class="rb" onclick="sR(0,this)">مخصص</button>
+  </div>
+  <div class="cm" id="cmBox"><label style="white-space:nowrap;font-size:12px;font-weight:800;color:var(--txt2)">عدد الأشهر:</label><div class="f" style="margin:0"><input id="cmI" type="number" min="1" max="36" value="1" oninput="var u=document.getElementById('fU').value.trim();var t=gT(u);if(t){rnM=parseInt(this.value)||1;document.getElementById('fP').value=t.rent*rnM;}cR()" style="width:65px"/></div></div>
+  <div class="ib" id="ib"></div>
+  <div class="f" style="margin-bottom:11px"><label>ملاحظات</label><textarea id="fNo" placeholder="ملاحظات..."></textarea></div>
+  <button class="btn btn-full" onclick="svPay()">💾 حفظ السند</button>
+</div>
+</div>
+
+<!-- ═══ الكشف الشهري ═══ -->
+<div id="kashf" class="pane">
+  <div class="card">
+    <div class="card-t">فلاتر الكشف</div>
+    <div class="g3">
+      <div class="f"><label>الشهر</label><select id="kMo"><option value="">كل الأشهر</option></select></div>
+      <div class="f"><label>نوع العقار</label><select id="kTy"><option value="">الكل</option><option>غرفة</option><option>شقة</option><option>محل</option></select></div>
+      <div class="f"><label>الحالة</label><select id="kSt"><option value="">الكل</option><option value="paid">دفعوا ✅</option><option value="unpaid">لم يدفعوا ❌</option></select></div>
+    </div>
+    <div style="display:flex;gap:7px">
+      <button class="btn btn-sky" onclick="rnKashf()">🔍 عرض الكشف</button>
+      <button class="btn btn-out" onclick="exKashf()">⬇️ تصدير Excel</button>
+    </div>
+  </div>
+  <div id="kOut"></div>
+</div>
+
+<!-- ═══ ملفات المستأجرين ═══ -->
+<div id="files" class="pane">
+  <div class="sbar">
+    <input id="fiS" placeholder="🔍 بحث..." oninput="rnFiles()"/>
+    <select id="fiTy" onchange="rnFiles()" style="flex:0 0 110px"><option value="">الكل</option><option>غرفة</option><option>شقة</option><option>محل</option></select>
+  </div>
+  <div class="fg" id="fGrid"></div>
+</div>
+
+<!-- ═══ سجل الدفعات ═══ -->
+<div id="log" class="pane">
+  <div class="sbar">
+    <input id="lS" placeholder="🔍 بحث..." oninput="rnLog()"/>
+    <input id="lD" type="date" onchange="rnLog()" style="flex:0 0 140px"/>
+    <button class="btn btn-out" onclick="document.getElementById('lD').value='';rnLog()">الكل</button>
+    <button class="btn btn-sky" onclick="exCSV()">⬇️ Excel</button>
+  </div>
+  <div class="card"><div class="tw" id="logB"></div></div>
+</div>
+
+<!-- ═══ المستأجرون ═══ -->
+<div id="ten" class="pane">
+  <div class="sbar">
+    <input id="tS" placeholder="🔍 بحث..." oninput="rnTen()"/>
+    <select id="tTy" onchange="rnTen()" style="flex:0 0 110px"><option value="">الكل</option><option>غرفة</option><option>شقة</option><option>محل</option></select>
+    <button class="btn" onclick="opAdd()">+ إضافة</button>
+  </div>
+  <div class="card"><div class="tw" id="tenB"></div></div>
+</div>
+
+<!-- ═══ المتأخرون ═══ -->
+<div id="due" class="pane"><div class="card"><div class="tw" id="dueB"></div></div></div>
+
+<!-- ═══ التنبيهات ═══ -->
+<div id="alert" class="pane"><div id="altB"></div></div>
+
+<!-- ═══ التقارير ═══ -->
+<div id="report" class="pane">
+  <div class="g2">
+    <div class="card"><div class="card-t">تحصيل آخر 30 يوم</div><div class="cw"><canvas id="cBar"></canvas></div></div>
+    <div class="card"><div class="card-t">توزيع حسب النوع</div><div class="cw"><canvas id="cPie"></canvas></div></div>
+  </div>
+  <div class="stats" id="rSts"></div>
+</div>
+
+<!-- ═══ الأرشيف ═══ -->
+<div id="archive" class="pane">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div style="font-size:15px;font-weight:900">🗄️ الأرشيف الشهري</div>
+    <button class="btn" onclick="opArch()">📦 أرشف الشهر</button>
+  </div>
+  <div id="archB"></div>
+</div>
+</div></div></div>
+
+<!-- ═══ MODALS ═══ -->
+<!-- إضافة/تعديل مستأجر -->
+<div class="mbg" id="tenMod">
+  <div class="modal">
+    <div class="mhdr"><div class="mttl" id="tenModT">إضافة مستأجر</div><div class="mx" onclick="cm('tenMod')">✕</div></div>
+    <div class="g2"><div class="f"><label>رقم العقار</label><input id="mU"/></div><div class="f"><label>النوع</label><select id="mTy"><option>غرفة</option><option>شقة</option><option>محل</option></select></div></div>
+    <div class="f" style="margin-bottom:8px"><label>اسم المستأجر</label><input id="mNm"/></div>
+    <div class="g3"><div class="f"><label>رقم الهوية/الإقامة</label><input id="mId" placeholder="اختياري"/></div><div class="f"><label>رقم العقد</label><input id="mCt" placeholder="اختياري"/></div><div class="f"><label>الجوال</label><input id="mPh" placeholder="05xxxxxxxx"/></div></div>
+    <div class="g2"><div class="f"><label>الإيجار ﷼</label><input id="mRt" type="number"/></div><div class="f"><label>المتبقي ﷼</label><input id="mRm" type="number"/></div></div>
+    <div class="g3"><div class="f"><label>تاريخ الدخول</label><input id="mEn" type="date"/></div><div class="f"><label>بداية العقد</label><input id="mSt" type="date"/></div><div class="f"><label>نهاية القسط</label><input id="mEd" type="date"/></div></div>
+    <div class="f" style="margin-bottom:4px"><label>ملاحظات</label><textarea id="mNo"></textarea></div>
+    <div class="mft"><button class="btn btn-out" onclick="cm('tenMod')" style="flex:1">إلغاء</button><button class="btn" onclick="svTen()" style="flex:2">💾 حفظ</button></div>
+  </div>
+</div>
+<!-- ملف المستأجر -->
+<div class="mbg" id="fileMod">
+  <div class="modal" style="max-width:580px"><div class="mhdr"><div class="mttl" id="fileModT">ملف المستأجر</div><div class="mx" onclick="cm('fileMod')">✕</div></div><div id="fileModB"></div></div>
+</div>
+<!-- ريستارت -->
+<div class="mbg" id="rstMod">
+  <div class="modal" style="max-width:400px">
+    <div class="mhdr"><div class="mttl">🔄 ريستارت</div><div class="mx" onclick="cm('rstMod')">✕</div></div>
+    <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:12px">
+      <label style="display:flex;align-items:center;gap:8px;padding:9px 12px;border:1.5px solid var(--bdr);border-radius:8px;cursor:pointer;font-size:13px;font-weight:700"><input type="checkbox" id="rP" style="accent-color:var(--lav);width:14px;height:14px"/> مسح سجل الدفعات</label>
+      <label style="display:flex;align-items:center;gap:8px;padding:9px 12px;border:1.5px solid var(--bdr);border-radius:8px;cursor:pointer;font-size:13px;font-weight:700"><input type="checkbox" id="rB" style="accent-color:var(--lav);width:14px;height:14px"/> إعادة تعيين الأرصدة والتواريخ</label>
+      <label style="display:flex;align-items:center;gap:8px;padding:9px 12px;border:1.5px solid #FECACA;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;color:var(--err);background:#FEF2F2"><input type="checkbox" id="rA" style="accent-color:var(--err);width:14px;height:14px"/> مسح كل شيء والرجوع للأصل</label>
+    </div>
+    <div style="background:#FFFBEB;border:1px solid #FCD34D;border-radius:7px;padding:8px 11px;font-size:11px;color:var(--warn);margin-bottom:12px;font-weight:700">⚠️ لا يمكن التراجع — أرشف أولاً</div>
+    <div class="mft"><button class="btn btn-out" onclick="cm('rstMod')" style="flex:1">إلغاء</button><button class="btn" onclick="doRst()" style="flex:2;background:linear-gradient(90deg,#DC2626,#EF4444)">🔄 تنفيذ</button></div>
+  </div>
+</div>
+<!-- أرشفة -->
+<div class="mbg" id="archMod">
+  <div class="modal" style="max-width:400px">
+    <div class="mhdr"><div class="mttl">📦 أرشفة الشهر</div><div class="mx" onclick="cm('archMod')">✕</div></div>
+    <div class="f" style="margin-bottom:8px"><label>اسم الشهر / الفترة</label><input id="aN" placeholder="مثال: يونيو 2025"/></div>
+    <div class="f" style="margin-bottom:12px"><label>ملاحظات</label><textarea id="aNo"></textarea></div>
+    <div class="mft"><button class="btn btn-out" onclick="cm('archMod')" style="flex:1">إلغاء</button><button class="btn btn-sky" onclick="doArch()" style="flex:2">📦 أرشف وابدأ جديداً</button></div>
+  </div>
+</div>
+<!-- سند القبض -->
+<div class="mbg" id="rcptMod">
+  <div class="modal" style="padding:0;max-width:440px">
+    <div id="rcptC">
+      <div class="rh"><div style="font-size:28px;margin-bottom:5px">🏢</div><div style="font-size:16px;font-weight:900">سند قبض إيجار</div><div style="font-size:10px;opacity:.5;margin-top:2px">نظام الإيجارات — Azzam</div></div>
+      <div style="padding:16px 20px">
+        <div id="rRows"></div>
+        <div class="rtot"><div style="font-size:12px;font-weight:700;color:var(--txt2)">المبلغ المدفوع</div><div style="font-size:20px;font-weight:900;color:var(--lav)" id="rAmt"></div></div>
+        <div style="text-align:center;margin:7px 0"><div class="rstamp" id="rStamp"></div></div>
+        <div style="text-align:center;padding:10px;border-top:1px solid var(--bdr);font-size:11px;color:var(--txt3);font-weight:700" id="rFoot"></div>
+      </div>
+    </div>
+    <div style="padding:10px 16px;display:flex;gap:6px;border-top:1px solid var(--bdr)" class="np">
+      <button class="btn btn-out" onclick="cm('rcptMod')" style="flex:1">إغلاق</button>
+      <button class="btn btn-sky" onclick="prRcpt()" style="flex:1">🖨️ PDF</button>
+      <button class="btn" onclick="shareWA()" style="flex:1;background:linear-gradient(90deg,#25D366,#128C7E)">📱 واتساب</button>
+    </div>
+  </div>
+</div>
+<!-- Google Sheets -->
+<div class="mbg" id="gsMod">
+  <div class="modal" style="max-width:480px">
+    <div class="mhdr"><div class="mttl">🔗 ربط Google Sheets</div><div class="mx" onclick="cm('gsMod')">✕</div></div>
+    <div style="background:#EFF6FF;border:1px solid #93C5FD;border-radius:8px;padding:10px 13px;font-size:12px;color:var(--room-t);margin-bottom:12px;line-height:1.7;font-weight:700">
+      <strong>خطوات الإعداد:</strong><br>
+      1️⃣ افتح Google Sheets جديد<br>
+      2️⃣ اذهب Extensions ← Apps Script<br>
+      3️⃣ الصق الكود أدناه ← Deploy ← Web App<br>
+      4️⃣ انسخ الرابط وضعه في الحقل
+    </div>
+    <div style="background:var(--bg);border:1px solid var(--bdr);border-radius:7px;padding:10px;font-size:11px;font-family:monospace;margin-bottom:12px;direction:ltr;text-align:left;color:var(--txt2);overflow-x:auto">
+function doPost(e){<br>
+&nbsp;&nbsp;var d=JSON.parse(e.postData.contents);<br>
+&nbsp;&nbsp;var s=SpreadsheetApp.getActiveSheet();<br>
+&nbsp;&nbsp;if(!s.getLastRow())s.appendRow(['العقار','المستأجر','النوع','المبلغ','الطريقة','التجديد','الانتهاء','التاريخ']);<br>
+&nbsp;&nbsp;s.appendRow([d.unit,d.name,d.type,d.paid,d.method,d.renewal,d.newEnd,d.date]);<br>
+&nbsp;&nbsp;return ContentService.createTextOutput('ok');<br>
+}
+    </div>
+    <div class="f" style="margin-bottom:12px"><label>رابط Web App</label><input id="gsU" placeholder="https://script.google.com/macros/s/..."/></div>
+    <div id="gsS" style="font-size:12px;font-weight:700;margin-bottom:10px"></div>
+    <div class="mft">
+      <button class="btn btn-out" onclick="cm('gsMod')" style="flex:1">إلغاء</button>
+      <button class="btn btn-sky" onclick="tstGS()" style="flex:1">🧪 اختبار</button>
+      <button class="btn" onclick="svGS()" style="flex:1">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── UTILS ──────────────────────────────────────────────────────
+var TODAY=new Date().toISOString().split('T')[0];
+var MNS=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+var TITLES={reg:'تسجيل سند جديد',kashf:'الكشف الشهري',files:'ملفات المستأجرين',log:'سجل الدفعات',ten:'المستأجرون',due:'المتأخرون',alert:'التنبيهات',report:'التقارير',archive:'الأرشيف الشهري'};
+
+function tcBg(t){return t==='غرفة'?'var(--room-bg);border-color:var(--room-b)':t==='شقة'?'var(--apt-bg);border-color:var(--apt-b)':'var(--shop-bg);border-color:var(--shop-b)';}
+function xl(n){if(!n||isNaN(n))return TODAY;return new Date(Math.round((n-25569)*86400*1000)).toISOString().split('T')[0];}
+function aM(ds,m){var d=new Date(ds);d.setMonth(d.getMonth()+m);return d.toISOString().split('T')[0];}
+function dif(ds){return Math.round((new Date(ds)-new Date(TODAY))/864e5);}
+function fmt(n){return Number(n||0).toLocaleString('en-US');}
+function mLbl(m){return m===1?'شهر':m===2?'شهرين':m===12?'سنة':m+' أشهر';}
+function tc(t){return t==='غرفة'?'t-r':t==='شقة'?'t-a':'t-s';}
+function rc(t){return t==='غرفة'?'row-r':t==='شقة'?'row-a':'row-s';}
+function fcc(t){return t==='غرفة'?'room':t==='شقة'?'apt':'shop';}
+function tIco(t){return t==='غرفة'?'🛏️':t==='شقة'?'🏠':'🏪';}
+function lsG(k,d){try{return localStorage.getItem(k)||d;}catch(e){return d;}}
+function lsS(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+
+// ─── DATA ───────────────────────────────────────────────────────
+var RAW=[
+  {unit:'70',name:'مد مد حسين',rent:1100,remaining:1100,endDate:xl(46210),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'71',name:'عبد الخالق مياه',rent:3000,remaining:3000,endDate:xl(46331),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'72',name:'محمد اوزال',rent:800,remaining:800,endDate:xl(46204),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'73',name:'مشرف / اقبال / أنور',rent:5500,remaining:5500,endDate:xl(46412),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'74',name:'بابل نورو ميه',rent:800,remaining:800,endDate:xl(46143),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'75',name:'منصور',rent:650,remaining:650,endDate:xl(46204),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'76',name:'سيفول انار علي',rent:800,remaining:800,endDate:xl(46190),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'77',name:'ريان حامظي',rent:800,remaining:800,endDate:xl(46204),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'78',name:'عبدالرقيب',rent:11000,remaining:11000,endDate:xl(46987),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'79',name:'محمد أحمد راشد',rent:800,remaining:800,endDate:xl(46204),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'80',name:'مد مد حسين',rent:600,remaining:600,endDate:xl(46201),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'81',name:'جاسم',rent:4800,remaining:4800,endDate:xl(46340),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'82',name:'سلام',rent:800,remaining:800,endDate:xl(46199),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'83',name:'مد مطيع ال رضاء رحمن',rent:700,remaining:700,endDate:xl(46115),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'84',name:'راجو احمد',rent:600,remaining:600,endDate:xl(46157),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'85',name:'محمد خندكار',rent:700,remaining:700,endDate:xl(46178),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'86',name:'محمد بن عبده آل مثيب',rent:800,remaining:800,endDate:xl(46179),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'87',name:'مد جهانغير عالم',rent:950,remaining:950,endDate:xl(46216),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'88',name:'شاهد',rent:750,remaining:750,endDate:xl(46204),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'89',name:'شريف حسين',rent:600,remaining:600,endDate:xl(46219),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'90',name:'شمس العالم علي',rent:800,remaining:800,endDate:xl(46214),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'91',name:'وحيد الزمان',rent:800,remaining:800,endDate:xl(46193),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'92',name:'عبدالله احمد العفاري',rent:700,remaining:700,endDate:xl(46213),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'93',name:'عبدالسلام ادريس',rent:600,remaining:600,endDate:xl(46190),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'94',name:'أبو شاهد',rent:700,remaining:700,endDate:xl(46211),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'95',name:'ميلون مياه',rent:850,remaining:850,endDate:xl(46193),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'96',name:'مشرف مبارك',rent:800,remaining:800,endDate:xl(46198),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'97',name:'أحمد بن علي حدادي',rent:4500,remaining:4500,endDate:xl(46244),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'98',name:'عبدالله المنهالي',rent:9000,remaining:9000,endDate:xl(46448),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'99',name:'سليمان حسين',rent:900,remaining:900,endDate:xl(46201),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'100',name:'محمد لقمان',rent:900,remaining:0,endDate:xl(46201),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'101',name:'احمد الصاد',rent:650,remaining:0,endDate:xl(46199),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'102',name:'اوزال رحمن',rent:600,remaining:0,endDate:xl(46170),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'103',name:'ربى أبو الكلام',rent:700,remaining:700,endDate:xl(46039),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'104',name:'عبد الفتاح القادري',rent:800,remaining:800,endDate:xl(46184),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'105',name:'اوزال رحمن',rent:800,remaining:800,endDate:xl(46187),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'106',name:'تميم / احسان',rent:700,remaining:700,endDate:xl(46023),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'121',name:'مرجان ميا',rent:700,remaining:700,endDate:xl(46208),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'122',name:'محمد اوسين',rent:650,remaining:650,endDate:xl(46194),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'123',name:'صفي يول',rent:700,remaining:700,endDate:xl(46183),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'124',name:'ايمون علي',rent:650,remaining:650,endDate:xl(46177),type:'غرفة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'109',name:'زهد الإسلام',rent:16000,remaining:16000,endDate:xl(46602),type:'شقة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'110',name:'محمد حضرت',rent:16000,remaining:16000,endDate:xl(46377),type:'شقة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'111',name:'امير مبارك',rent:16000,remaining:16000,endDate:xl(46377),type:'شقة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'112',name:'عالم جير مياه / دولال',rent:16000,remaining:16000,endDate:xl(46189),type:'شقة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'113',name:'محمد آل امين محمد',rent:8000,remaining:8000,endDate:xl(46348),type:'شقة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'114',name:'صلاح الدين',rent:8000,remaining:8000,endDate:xl(46277),type:'شقة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'115',name:'محمد علي',rent:16000,remaining:16000,endDate:xl(46357),type:'شقة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'116',name:'أبو الكلام محمد',rent:8000,remaining:8000,endDate:xl(46023),type:'شقة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'117',name:'محمد علي',rent:16000,remaining:16000,endDate:xl(46649),type:'شقة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'118',name:'عيدروس بدر احمد',rent:8000,remaining:8000,endDate:xl(46264),type:'شقة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'120',name:'فريد',rent:16000,remaining:16000,endDate:xl(46742),type:'شقة',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'54-58',name:'مؤسسة وضحاء السبيعي',rent:30000,remaining:30000,endDate:xl(46514),type:'محل',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'60-62',name:'عبدالخالق الحميري',rent:80000,remaining:80000,endDate:xl(46691),type:'محل',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'63',name:'مؤسسة وضحاء السبيعي للخيام',rent:35000,remaining:17500,endDate:xl(46337),type:'محل',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'64-59',name:'مؤسسة وضحاء السبيعي',rent:30000,remaining:30000,endDate:xl(46514),type:'محل',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'3',name:'السماعيل',rent:25000,remaining:25000,endDate:xl(46761),type:'محل',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'4',name:'مؤسسة نورة الدوسري',rent:55000,remaining:55000,endDate:xl(46485),type:'محل',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'5-6',name:'م الأصالة للخيام',rent:95000,remaining:95000,endDate:xl(46553),type:'محل',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'10',name:'مؤسسة أرياف بلادي',rent:30000,remaining:30000,endDate:xl(46248),type:'محل',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'11',name:'مؤسسة المبدع الناجح',rent:32000,remaining:16000,endDate:xl(46498),type:'محل',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+  {unit:'13-14',name:'السماعيل',rent:80000,remaining:80000,endDate:xl(46277),type:'محل',phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''},
+];
+
+var tens=JSON.parse(lsG('rt','null'))||RAW.map(function(t){return Object.assign({},t);});
+var pays=JSON.parse(lsG('rp','[]'));
+var arcs=JSON.parse(lsG('ra','[]'));
+var rnM=1,edU=null,curR=null,cB=null,cP=null,gsUrl=lsG('rg','');
+
+function sv(){lsS('rt',JSON.stringify(tens));lsS('rp',JSON.stringify(pays));}
+function svA(){lsS('ra',JSON.stringify(arcs));}
+function gT(u){return tens.find(function(t){return t.unit===u;});}
+
+// ─── INIT ───────────────────────────────────────────────────────
+document.getElementById('fD').value=TODAY;
+(function(){
+  var d=new Date();
+  try{document.getElementById('dHj').textContent=new Intl.DateTimeFormat('ar-SA-u-ca-islamic-nu-latn',{year:'numeric',month:'long',day:'numeric'}).format(d);}catch(e){}
+  document.getElementById('dGr').textContent=d.toLocaleDateString('ar-SA-u-nu-latn',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  if(lsG('rdk','0')==='1'){document.body.classList.add('dk');document.getElementById('dico').textContent='☀️';document.getElementById('dico2').textContent='☀️';document.getElementById('dlbl').textContent='نهاري';}
+  fillMonthSel();
+  rnSts();
+  chkBanner();
+  updateGsLabel();
+})();
+
+function toggleDk(){
+  var d=document.body.classList.toggle('dk');lsS('rdk',d?'1':'0');
+  var ico=d?'☀️':'🌙',lbl=d?'نهاري':'ليلي';
+  document.getElementById('dico').textContent=ico;document.getElementById('dico2').textContent=ico;document.getElementById('dlbl').textContent=lbl;
+}
+
+function fillMonthSel(){
+  var seen={};pays.forEach(function(p){if(p.date)seen[p.date.substring(0,7)]=1;});
+  var sel=document.getElementById('kMo');while(sel.options.length>1)sel.remove(1);
+  Object.keys(seen).sort().reverse().forEach(function(m){
+    var parts=m.split('-');var label=MNS[parseInt(parts[1])-1]+' '+parts[0];
+    var o=document.createElement('option');o.value=m;o.textContent=label;sel.appendChild(o);
+  });
+}
+
+// ─── NAV ────────────────────────────────────────────────────────
+var TABS=['reg','kashf','files','log','ten','due','alert','report','archive'];
+function go(tab){
+  TABS.forEach(function(id,i){
+    document.getElementById(id).classList.toggle('on',id===tab);
+    document.querySelectorAll('.ni')[i].classList.toggle('on',TABS[i]===tab);
+  });
+  document.getElementById('pgtitle').textContent=TITLES[tab]||'';
+  if(tab==='kashf')rnKashf();
+  if(tab==='files')rnFiles();
+  if(tab==='log')rnLog();
+  if(tab==='ten')rnTen();
+  if(tab==='due')rnDue();
+  if(tab==='alert')rnAlert();
+  if(tab==='report')rnReport();
+  if(tab==='archive')rnArch();
+}
+
+// ─── STATS ──────────────────────────────────────────────────────
+function rnSts(){
+  var due=tens.filter(function(t){return t.remaining>0&&dif(t.endDate)<0;});
+  var td=pays.filter(function(p){return p.date===TODAY;});
+  var soon=tens.filter(function(t){return dif(t.endDate)>=0&&dif(t.endDate)<=14&&t.remaining>0;});
+  var db=document.getElementById('dBdg');db.textContent=due.length;db.style.display=due.length?'inline':'none';
+  document.getElementById('sts').innerHTML=
+    '<div class="sc"><div class="sc-lbl">إجمالي التحصيل</div><span class="sc-val g">'+fmt(td.reduce(function(s,p){return s+p.paid;},0))+' ﷼</span><div class="sc-ico">💳</div></div>'+
+    '<div class="sc"><div class="sc-lbl">دفعات اليوم</div><span class="sc-val b">'+td.length+'</span><div class="sc-ico">📝</div></div>'+
+    '<div class="sc"><div class="sc-lbl">متأخرون</div><span class="sc-val r">'+due.length+'</span><div class="sc-ico">⚠️</div></div>'+
+    '<div class="sc"><div class="sc-lbl">ينتهي قريباً</div><span class="sc-val w">'+soon.length+'</span><div class="sc-ico">⏰</div></div>';
+}
+
+function chkBanner(){
+  var e=tens.filter(function(t){return dif(t.endDate)<0&&t.remaining>0;});
+  var s=tens.filter(function(t){return dif(t.endDate)>=0&&dif(t.endDate)<=7&&t.remaining>0;});
+  var parts=[];if(e.length)parts.push('⚠️ '+e.length+' عقد منتهي');if(s.length)parts.push('⏰ '+s.length+' ينتهي هذا الأسبوع');
+  if(parts.length){document.getElementById('wbt').textContent=parts.join(' | ');document.getElementById('wb').style.display='block';}
+}
+
+// ─── PAYMENT FORM ───────────────────────────────────────────────
+function sR(v,btn){
+  document.querySelectorAll('.rb').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');
+  var cb=document.getElementById('cmBox');
+  if(v===0){cb.classList.add('show');rnM=parseInt(document.getElementById('cmI').value)||1;}
+  else{cb.classList.remove('show');rnM=v;}
+  // Auto-update paid amount = rent * months
+  var u=document.getElementById('fU').value.trim();var t=gT(u);
+  if(t){
+    var totalDue=t.rent*rnM;
+    document.getElementById('fP').value=totalDue;
+  }
+  cR();
+}
+function fT(){
+  var u=document.getElementById('fU').value.trim();var t=gT(u);var h=document.getElementById('fH');
+  if(t){
+    document.getElementById('fN').value=t.name;document.getElementById('fR').value=t.rent;document.getElementById('fTp').value=t.type;
+    // Auto-fill: rent * months always
+    document.getElementById('fP').value=t.rent*rnM;
+    var d=dif(t.endDate);h.className='hint ok';h.style.display='block';
+    h.innerHTML='انتهاء: <strong>'+t.endDate+'</strong> | <strong style="color:'+(d<0?'var(--err)':'var(--ok)')+'">'+( d<0?'تأخر '+Math.abs(d)+' يوم':d+' يوم متبقي')+'</strong>';
+    cR();
+  } else {
+    ['fN','fR','fTp','fP','fRm'].forEach(function(id){document.getElementById(id).value='';});
+    document.getElementById('ib').style.display='none';
+    h.className='hint err';h.style.display=u?'block':'none';h.textContent=u?'⚠️ غير موجود':'';
+  }
+}
+function cR(){
+  if(document.getElementById('cmBox').classList.contains('show'))rnM=parseInt(document.getElementById('cmI').value)||1;
+  var u=document.getElementById('fU').value.trim();var t=gT(u);
+  var paid=parseFloat(document.getElementById('fP').value)||0;
+  var baseRent=t?t.rent:0;
+  var totalDue=baseRent*rnM;
+  var cr=t?t.remaining:0;
+  var effectiveDue=cr>0?cr:totalDue;
+  var nr=Math.max(0,effectiveDue-paid);
+  document.getElementById('fRm').value=nr;
+  var ib=document.getElementById('ib');
+  if(t&&paid>0){
+    var base=t.endDate<TODAY?TODAY:t.endDate;var ne=aM(base,rnM);
+    if(paid>=effectiveDue){
+      ib.className='ib bl';ib.style.display='block';
+      ib.innerHTML='✅ سيتجدد <strong>'+mLbl(rnM)+'</strong> — نهاية القسط: <strong>'+ne+'</strong>';
+    } else {
+      ib.className='ib yl';ib.style.display='block';
+      ib.innerHTML='⚡ دفع جزئي — المتبقي <strong>'+fmt(nr)+' ﷼</strong> من <strong>'+fmt(effectiveDue)+' ﷼</strong>';
+    }
+  } else if(t&&rnM>1){
+    ib.className='ib bl';ib.style.display='block';
+    ib.innerHTML='💡 إجمالي '+mLbl(rnM)+': <strong>'+fmt(totalDue)+' ﷼</strong> ('+fmt(baseRent)+' × '+rnM+')';
+  } else ib.style.display='none';
+}
+
+function svPay(){
+  var u=document.getElementById('fU').value.trim();var paid=parseFloat(document.getElementById('fP').value)||0;var date=document.getElementById('fD').value;
+  if(!u||paid<=0||!date){shMsg('rm','⚠️ أدخل رقم العقار والمبلغ والتاريخ','err');return;}
+  var t=gT(u);if(!t){shMsg('rm','⚠️ رقم العقار غير موجود','err');return;}
+  // Use rent*months as the expected amount if remaining is 0 (fresh month)
+  var expected=t.remaining>0?t.remaining:t.rent*rnM;
+  var prev=expected;
+  t.remaining=Math.max(0,expected-paid);
+  var ne=t.endDate;
+  if(paid>=expected){var base=t.endDate<TODAY?TODAY:t.endDate;ne=aM(base,rnM);t.endDate=ne;}
+  var pay={id:Date.now(),unit:u,name:t.name,type:t.type,paid:paid,prev:prev,newRem:t.remaining,rm:paid>=prev?rnM:0,newEnd:ne,date:date,method:document.getElementById('fM').value,notes:document.getElementById('fNo').value.trim()};
+  pays.push(pay);sv();curR=pay;
+  sndGS(pay);fillMonthSel();
+  shMsg('rm','✅ تم تسجيل '+fmt(paid)+' ﷼ — '+t.name,'ok');
+  plySnd();shAnim(paid>=prev?'تم التسجيل! 🎉':'دفعة جزئية ✓',fmt(paid)+' ﷼ — '+t.name);
+  ['fU','fN','fTp','fP','fRm','fNo'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('fR').value='';document.getElementById('fH').style.display='none';document.getElementById('ib').style.display='none';document.getElementById('fD').value=TODAY;
+  rnSts();setTimeout(function(){opRcpt(pay);},900);
+}
+
+// ─── RECEIPT ────────────────────────────────────────────────────
+function opRcpt(p){
+  if(!p)return;curR=p;
+  var rows=[['رقم العقار',p.unit],['المستأجر',p.name],['النوع',p.type||'-'],['المبلغ المدفوع',fmt(p.paid)+' ﷼'],['طريقة الدفع',p.method],['التاريخ',p.date]];
+  if(p.newRem>0) rows.push(['المتبقي',fmt(p.newRem)+' ﷼']);
+  else rows.push(['الحالة','مسدد بالكامل ✅']);
+  if(p.rm>0){rows.push(['التجديد',mLbl(p.rm)]);rows.push(['نهاية القسط الجديدة',p.newEnd]);}
+  if(p.notes)rows.push(['ملاحظات',p.notes]);
+  document.getElementById('rRows').innerHTML=rows.map(function(r){return '<div class="rrow"><span style="color:#333333;font-size:11px;font-weight:800">'+r[0]+'</span><span style="font-weight:800">'+r[1]+'</span></div>';}).join('');
+  document.getElementById('rAmt').textContent=fmt(p.paid)+' ﷼';
+  var sc=p.newRem===0?'var(--ok)':'var(--warn)';var st=document.getElementById('rStamp');
+  st.textContent=p.newRem===0?'مسدد':'جزئي';st.style.borderColor=sc;st.style.color=sc;
+  document.getElementById('rFoot').innerHTML='وثيقة رسمية | الإصدار: '+TODAY+' | رقم: '+p.id;
+  document.getElementById('rcptMod').classList.add('show');
+}
+function prRcpt(){
+  var pa=document.createElement('div');pa.id='pArea';pa.style.cssText='position:fixed;inset:0;background:#fff;z-index:99999;overflow:auto;padding:20px;direction:rtl;font-family:Tajawal,sans-serif';
+  pa.innerHTML=document.getElementById('rcptC').innerHTML;document.body.appendChild(pa);window.print();setTimeout(function(){document.body.removeChild(pa);},1000);
+}
+
+// ─── KASHF ──────────────────────────────────────────────────────
+function rnKashf(){
+  var mo=document.getElementById('kMo').value;var ty=document.getElementById('kTy').value;var st=document.getElementById('kSt').value;
+  var fp=pays.filter(function(p){return(!mo||p.date&&p.date.substring(0,7)===mo)&&(!ty||p.type===ty);});
+  var pu={};fp.forEach(function(p){pu[p.unit]=(pu[p.unit]||0)+p.paid;});
+  var at=ty?tens.filter(function(t){return t.type===ty;}):tens.slice();
+  var dt=st==='paid'?at.filter(function(t){return !!pu[t.unit];}):st==='unpaid'?at.filter(function(t){return !pu[t.unit];}):at;
+  var tot=fp.reduce(function(s,p){return s+p.paid;},0);var pc=Object.keys(pu).length;
+  var od=at.filter(function(t){return t.remaining>0&&dif(t.endDate)<0;}).sort(function(a,b){return b.remaining-a.remaining;});
+  var h='<div class="ks">';
+  h+='<div class="kc" style="background:#3B0764;border:none"><div class="kc-l" style="color:#fff;font-size:15px;font-weight:900">إجمالي التحصيل</div><div class="kc-v" style="color:#fff;font-size:28px;font-weight:900">'+fmt(tot)+' ﷼</div></div>';
+  h+='<div class="kc" style="background:#1E3A8A;border:none"><div class="kc-l" style="color:#fff;font-size:15px;font-weight:900">عدد الدفعات</div><div class="kc-v" style="color:#fff;font-size:28px;font-weight:900">'+fp.length+'</div></div>';
+  h+='<div class="kc" style="background:#14532D;border:none"><div class="kc-l" style="color:#fff;font-size:15px;font-weight:900">دفعوا ✅</div><div class="kc-v" style="color:#fff;font-size:28px;font-weight:900">'+pc+'</div></div>';
+  h+='<div class="kc" style="background:#7F1D1D;border:none"><div class="kc-l" style="color:#fff;font-size:15px;font-weight:900">لم يدفعوا ❌</div><div class="kc-v" style="color:#fff;font-size:28px;font-weight:900">'+(at.length-pc)+'</div></div>';
+  h+='</div>';
+  // type breakdown
+  h+='<div class="card"><div class="card-t">التحصيل حسب النوع</div><div class="g3">';
+  [{n:'غرفة',bg:'#1E3A8A'},{n:'شقة',bg:'#14532D'},{n:'محل',bg:'#78350F'}].forEach(function(x){
+    var tp=fp.filter(function(p){return p.type===x.n;});var tt=tp.reduce(function(s,p){return s+p.paid;},0);
+    h+='<div style="background:'+x.bg+';border:none;border-radius:10px;padding:16px;text-align:center">'+
+    '<div style="font-size:16px;font-weight:900;color:#fff;margin-bottom:6px">'+tIco(x.n)+' '+x.n+'</div>'+
+    '<div style="font-size:18px;font-weight:900;color:#fff;margin-bottom:4px">'+fmt(tt)+' ﷼</div>'+
+    '<div style="font-size:14px;color:rgba(255,255,255,.8);font-weight:800">'+tp.length+' دفعة</div></div>';
+  });
+  h+='</div></div>';
+  // top overdue
+  if(od.length){
+    h+='<div class="card"><div class="card-t">أكثر المتأخرين</div><div class="tw"><table class="tbl"><thead><tr><th>#</th><th>العقار</th><th>المستأجر</th><th>النوع</th><th>المتبقي</th><th>أيام التأخر</th></tr></thead><tbody>';
+    od.slice(0,10).forEach(function(t,i){
+      h+='<tr class="'+rc(t.type)+'"><td><strong>'+(i+1)+'</strong></td><td><strong>'+t.unit+'</strong></td><td>'+t.name+'</td><td><span class="'+tc(t.type)+'">'+tIco(t.type)+' '+t.type+'</span></td><td style="color:var(--err);font-weight:800">'+fmt(t.remaining)+' ﷼</td><td><span class="bdg bdg-err">'+Math.abs(dif(t.endDate))+' يوم</span></td></tr>';
+    });
+    h+='</tbody></table></div></div>';
+  }
+  // main table
+  h+='<div class="card"><div class="card-t">تفاصيل المستأجرين</div><div class="tw"><table class="tbl"><thead><tr><th>العقار</th><th>المستأجر</th><th>النوع</th><th>الإيجار</th><th>المدفوع</th><th>المتبقي</th><th>الحالة</th></tr></thead><tbody>';
+  dt.forEach(function(t){
+    var paid=pu[t.unit]||0;var hp=!!pu[t.unit];
+    h+='<tr class="'+rc(t.type)+'"><td><strong>'+t.unit+'</strong></td><td>'+t.name+'</td><td><span class="'+tc(t.type)+'">'+tIco(t.type)+' '+t.type+'</span></td>'+
+    '<td>'+fmt(t.rent)+' ﷼</td>'+
+    '<td style="color:'+(hp?'var(--ok)':'var(--err)')+';font-weight:800">'+(hp?fmt(paid)+' ﷼':'-')+'</td>'+
+    '<td style="color:'+(t.remaining>0?'var(--err)':'var(--ok)')+';font-weight:800">'+fmt(t.remaining)+' ﷼</td>'+
+    '<td>'+(hp?'<span class="bdg bdg-ok">دفع ✅</span>':'<span class="bdg bdg-err">لم يدفع ❌</span>')+'</td></tr>';
+  });
+  h+='</tbody></table></div></div>';
+  document.getElementById('kOut').innerHTML=h;
+}
+function exKashf(){
+  var mo=document.getElementById('kMo').value;var ty=document.getElementById('kTy').value;
+  var fp=pays.filter(function(p){return(!mo||p.date&&p.date.substring(0,7)===mo)&&(!ty||p.type===ty);});
+  var pu={};fp.forEach(function(p){pu[p.unit]=(pu[p.unit]||0)+p.paid;});
+  var at=ty?tens.filter(function(t){return t.type===ty;}):tens.slice();
+  var rows=[['رقم العقار','المستأجر','النوع','الإيجار','المدفوع','المتبقي','الحالة']];
+  at.forEach(function(t){rows.push([t.unit,t.name,t.type,t.rent,pu[t.unit]||0,t.remaining,pu[t.unit]?'دفع':'لم يدفع']);});
+  var csv='\uFEFF'+rows.map(function(r){return r.map(function(c){return '"'+c+'"';}).join(',');}).join('\n');
+  var a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='كشف_'+(mo||'كل')+'_'+(ty||'الكل')+'.csv';a.click();
+}
+
+// ─── FILES ──────────────────────────────────────────────────────
+function rnFiles(){
+  var s=document.getElementById('fiS').value.toLowerCase();var ty=document.getElementById('fiTy').value;
+  var list=tens.filter(function(t){return(!s||t.unit.indexOf(s)>=0||t.name.toLowerCase().indexOf(s)>=0)&&(!ty||t.type===ty);});
+  var g=document.getElementById('fGrid');
+  if(!list.length){g.innerHTML='<div class="empty">🗂️<br>لا توجد نتائج</div>';return;}
+  g.innerHTML=list.map(function(t){
+    var tp=pays.filter(function(p){return p.unit===t.unit;});var d=dif(t.endDate);
+    return '<div class="fc '+fcc(t.type)+'" onclick="opFile(\''+t.unit+'\')" style="background:'+tcBg(t.type)+'">'+
+    '<div style="display:flex;align-items:center;gap:9px;margin-bottom:9px">'+
+    '<div style="width:38px;height:38px;background:var(--'+fcc(t.type)+'-bg);border:2px solid var(--'+fcc(t.type)+'-b);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:var(--'+fcc(t.type)+'-t);flex-shrink:0">'+t.unit+'</div>'+
+    '<div><div class="fc-name">'+t.name+'</div>'+
+    '<span class="'+tc(t.type)+'" style="font-size:10px">'+tIco(t.type)+' '+t.type+'</span></div></div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'+
+    '<div style="background:rgba(255,255,255,.7);border-radius:6px;padding:5px 7px"><div style="color:var(--txt3);font-weight:800;font-size:14px">الإيجار</div><div style="font-weight:900;font-size:18px;color:#000">'+fmt(t.rent)+' ﷼</div></div>'+
+    '<div style="background:'+(t.remaining>0?'#FEF2F2':'#ECFDF5')+';border-radius:6px;padding:5px 7px"><div style="color:'+(t.remaining>0?'var(--err)':'var(--ok)')+';font-weight:700">المتبقي</div><div style="font-weight:900;color:'+(t.remaining>0?'var(--err)':'var(--ok)')+'">'+fmt(t.remaining)+' ﷼</div></div>'+
+    '<div style="background:rgba(255,255,255,.7);border-radius:6px;padding:5px 7px"><div style="color:var(--txt3);font-weight:800;font-size:14px">السندات</div><div style="font-weight:900;font-size:18px;color:#3B0764">'+tp.length+'</div></div>'+
+    '<div style="background:'+(d<0?'#FEF2F2':'#ECFDF5')+';border-radius:6px;padding:5px 7px"><div style="color:'+(d<0?'var(--err)':'var(--ok)')+';font-weight:700">انتهاء</div><div style="font-weight:900;font-size:10px;color:'+(d<0?'var(--err)':'var(--ok)')+'">'+t.endDate+'</div></div>'+
+    '</div></div>';
+  }).join('');
+}
+function opFile(u){
+  var t=gT(u);if(!t)return;
+  var tp=pays.filter(function(p){return p.unit===u;}).slice().reverse();
+  var tot=tp.reduce(function(s,p){return s+p.paid;},0);var d=dif(t.endDate);
+  var h='<div class="tfh '+fcc(t.type)+'">';
+  h+='<div style="display:flex;align-items:center;gap:12px">';
+  h+='<div style="width:48px;height:48px;background:rgba(255,255,255,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;flex-shrink:0">'+t.unit+'</div>';
+  h+='<div><div style="font-size:17px;font-weight:900;margin-bottom:3px">'+t.name+'</div>';
+  h+='<div style="font-size:11px;opacity:.75;display:flex;gap:10px;flex-wrap:wrap">';
+  if(t.idNum)h+='<span>🪪 '+t.idNum+'</span>';if(t.contract)h+='<span>📄 '+t.contract+'</span>';if(t.phone)h+='<span>📱 '+t.phone+'</span>';
+  h+='</div></div></div></div>';
+  // info grid
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:7px;margin-bottom:12px">';
+  var info=[['الإيجار',fmt(t.rent)+' ﷼','var(--lav)'],['المتبقي',fmt(t.remaining)+' ﷼',t.remaining>0?'var(--err)':'var(--ok)'],['إجمالي المدفوع',fmt(tot)+' ﷼','var(--ok)'],['نهاية القسط',t.endDate,d<0?'var(--err)':'var(--ok)']];
+  if(t.entryDate)info.push(['تاريخ الدخول',t.entryDate,'var(--sky)']);if(t.startDate)info.push(['بداية العقد',t.startDate,'var(--sky)']);
+  info.forEach(function(x){h+='<div style="background:var(--bg);border-radius:7px;padding:8px 10px;border:1px solid var(--bdr)"><div style="font-size:10px;color:var(--txt3);font-weight:700;margin-bottom:2px">'+x[0]+'</div><div style="font-size:13px;font-weight:900;color:'+x[2]+'">'+x[1]+'</div></div>';});
+  h+='</div>';
+  if(t.notes)h+='<div style="background:#FFFBEB;border:1px solid #FCD34D;border-radius:7px;padding:8px 11px;font-size:12px;font-weight:700;color:var(--warn);margin-bottom:11px">📝 '+t.notes+'</div>';
+  h+='<div style="font-size:11px;font-weight:800;color:var(--txt2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.3px">📋 سجل الدفعات ('+tp.length+')</div>';
+  if(!tp.length)h+='<div style="text-align:center;color:var(--txt3);padding:1rem;font-size:13px;font-weight:700">لا توجد دفعات بعد</div>';
+  else{
+    h+='<div class="tl">';
+    tp.forEach(function(p){
+      h+='<div class="tlitem"><div class="tldot"></div><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:5px">'+
+      '<div><div style="font-size:13px;font-weight:900;color:var(--ok)">'+fmt(p.paid)+' ﷼</div>'+
+      '<div style="font-size:11px;color:var(--txt3);margin-top:1px;font-weight:700">'+p.date+' | '+p.method+(p.rm>0?' | '+mLbl(p.rm):'')+'</div>'+
+      (p.notes?'<div style="font-size:11px;color:var(--warn);font-weight:700">📝 '+p.notes+'</div>':'')+'</div>'+
+      '<button class="btn btn-sky" style="font-size:11px;padding:3px 9px" onclick="opRcpt(pays.find(function(x){return x.id==='+p.id+';}))">📄 سند</button>'+
+      '</div></div>';
+    });
+    h+='</div>';
+  }
+  h+='<div class="mft"><button class="btn btn-out" onclick="cm(\'fileMod\');opEdit(\''+u+'\')" style="flex:1">✏️ تعديل</button><button class="btn" onclick="cm(\'fileMod\');qR(\''+u+'\')" style="flex:1">💳 تسجيل سند</button></div>';
+  document.getElementById('fileModT').textContent='ملف — '+t.name+' ('+u+')';
+  document.getElementById('fileModB').innerHTML=h;
+  document.getElementById('fileMod').classList.add('show');
+}
+
+// ─── LOG ────────────────────────────────────────────────────────
+function rnLog(){
+  var s=document.getElementById('lS').value.toLowerCase();var df=document.getElementById('lD').value;
+  var list=pays.slice().reverse();
+  if(df)list=list.filter(function(p){return p.date===df;});
+  if(s)list=list.filter(function(p){return p.unit.indexOf(s)>=0||p.name.toLowerCase().indexOf(s)>=0;});
+  var b=document.getElementById('logB');
+  if(!list.length){b.innerHTML='<div class="empty">📭<br>لا توجد دفعات</div>';return;}
+  b.innerHTML='<table class="tbl"><thead><tr><th>العقار</th><th>النوع</th><th>المستأجر</th><th>المدفوع</th><th>الطريقة</th><th>التجديد</th><th>نهاية قسط جديدة</th><th>التاريخ</th><th></th></tr></thead><tbody>'+
+  list.map(function(p){return '<tr class="'+rc(p.type)+'">'+'<td><strong>'+p.unit+'</strong></td><td><span class="'+tc(p.type)+'">'+tIco(p.type)+' '+p.type+'</span></td><td>'+p.name+'</td>'+
+  '<td style="color:var(--ok);font-weight:800">'+fmt(p.paid)+' ﷼</td><td><span class="bdg bdg-ok">'+p.method+'</span></td>'+
+  '<td>'+(p.rm>0?'<span class="bdg bdg-lav">'+mLbl(p.rm)+'</span>':'<span class="bdg bdg-warn">جزئي</span>')+'</td>'+
+  '<td style="color:var(--sky);font-weight:700">'+(p.rm>0?p.newEnd:'-')+'</td><td style="color:var(--txt3);font-weight:700">'+p.date+'</td>'+
+  '<td><button class="btn btn-sky" style="padding:2px 7px;font-size:11px" onclick="opRcpt(pays.find(function(x){return x.id==='+p.id+';}))">📄</button></td></tr>';}).join('')+'</tbody></table>';
+}
+function exCSV(){
+  var rows=[['العقار','النوع','المستأجر','المدفوع','الطريقة','التجديد','الانتهاء','التاريخ','المتبقي']];
+  pays.forEach(function(p){rows.push([p.unit,p.type||'',p.name,p.paid,p.method,p.rm>0?mLbl(p.rm):'جزئي',p.rm>0?p.newEnd:'-',p.date,p.newRem]);});
+  var csv='\uFEFF'+rows.map(function(r){return r.map(function(c){return '"'+c+'"';}).join(',');}).join('\n');
+  var a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='دفعات_'+TODAY+'.csv';a.click();
+}
+
+// ─── TENANTS ────────────────────────────────────────────────────
+function rnTen(){
+  var s=document.getElementById('tS').value.toLowerCase();var ty=document.getElementById('tTy').value;
+  var list=tens.filter(function(t){return(!s||t.unit.indexOf(s)>=0||t.name.toLowerCase().indexOf(s)>=0)&&(!ty||t.type===ty);});
+  var b=document.getElementById('tenB');
+  b.innerHTML='<table class="tbl"><thead><tr><th>العقار</th><th>النوع</th><th>المستأجر</th><th>الإيجار</th><th>المتبقي</th><th>نهاية القسط</th><th>الحالة</th><th></th></tr></thead><tbody>'+
+  list.map(function(t){
+    var d=dif(t.endDate);var ov=d<0&&t.remaining>0;var pd=t.remaining===0;
+    return '<tr class="'+rc(t.type)+'" onclick="opFile(\''+t.unit+'\')" style="cursor:pointer">'+'<td><strong>'+t.unit+'</strong></td><td><span class="'+tc(t.type)+'">'+tIco(t.type)+' '+t.type+'</span></td><td style="font-weight:700">'+t.name+'</td>'+
+    '<td>'+fmt(t.rent)+' ﷼</td><td style="color:'+(t.remaining>0?'var(--err)':'var(--ok)')+';font-weight:800">'+fmt(t.remaining)+' ﷼</td>'+
+    '<td style="color:'+(d<0?'var(--err)':d<=14?'var(--warn)':'var(--txt3)')+';font-weight:700">'+t.endDate+'</td>'+
+    '<td>'+(ov?'<span class="bdg bdg-err">متأخر</span>':pd?'<span class="bdg bdg-ok">مسدد</span>':'<span class="bdg bdg-info">جارٍ</span>')+'</td>'+
+    '<td onclick="event.stopPropagation()" style="display:flex;gap:3px"><button class="btn-sm" onclick="qR(\''+t.unit+'\')">💳</button><button class="btn-sm" onclick="opEdit(\''+t.unit+'\')">✏️</button><button class="btn-del" onclick="dlTen(\''+t.unit+'\')">🗑️</button></td></tr>';
+  }).join('')+'</tbody></table>';
+}
+function opAdd(){edU=null;document.getElementById('tenModT').textContent='إضافة مستأجر';['mU','mNm','mId','mCt','mRt','mRm','mPh','mNo'].forEach(function(id){document.getElementById(id).value='';});['mEn','mSt','mEd'].forEach(function(id){document.getElementById(id).value=TODAY;});document.getElementById('mTy').value='غرفة';document.getElementById('tenMod').classList.add('show');}
+function opEdit(u){
+  edU=u;var t=gT(u);if(!t)return;
+  document.getElementById('tenModT').textContent='تعديل — '+u;
+  document.getElementById('mU').value=t.unit;document.getElementById('mNm').value=t.name;document.getElementById('mId').value=t.idNum||'';document.getElementById('mCt').value=t.contract||'';
+  document.getElementById('mRt').value=t.rent;document.getElementById('mRm').value=t.remaining;document.getElementById('mPh').value=t.phone||'';document.getElementById('mNo').value=t.notes||'';
+  document.getElementById('mEn').value=t.entryDate||TODAY;document.getElementById('mSt').value=t.startDate||TODAY;document.getElementById('mEd').value=t.endDate;
+  document.getElementById('mTy').value=t.type||'غرفة';document.getElementById('tenMod').classList.add('show');
+}
+function svTen(){
+  var u=document.getElementById('mU').value.trim();var nm=document.getElementById('mNm').value.trim();if(!u||!nm){alert('أدخل رقم العقار والاسم');return;}
+  var obj={unit:u,name:nm,idNum:document.getElementById('mId').value.trim(),contract:document.getElementById('mCt').value.trim(),rent:parseFloat(document.getElementById('mRt').value)||0,remaining:parseFloat(document.getElementById('mRm').value)||0,phone:document.getElementById('mPh').value.trim(),notes:document.getElementById('mNo').value.trim(),endDate:document.getElementById('mEd').value,entryDate:document.getElementById('mEn').value,startDate:document.getElementById('mSt').value,type:document.getElementById('mTy').value};
+  if(edU){var t=gT(edU);if(t)Object.assign(t,obj);}else{if(gT(u)){alert('رقم العقار موجود مسبقاً');return;}tens.push(obj);}
+  sv();cm('tenMod');rnTen();rnSts();
+}
+function dlTen(u){if(!confirm('حذف هذا المستأجر؟'))return;tens=tens.filter(function(t){return t.unit!==u;});sv();rnTen();rnSts();}
+
+// ─── OVERDUE ────────────────────────────────────────────────────
+function rnDue(){
+  var list=tens.filter(function(t){return t.remaining>0&&dif(t.endDate)<0;}).sort(function(a,b){return dif(a.endDate)-dif(b.endDate);});
+  var b=document.getElementById('dueB');
+  if(!list.length){b.innerHTML='<div class="empty">🎉<br>لا يوجد متأخرون</div>';return;}
+  b.innerHTML='<table class="tbl"><thead><tr><th>العقار</th><th>النوع</th><th>المستأجر</th><th>الإيجار</th><th>المتبقي</th><th>أيام التأخر</th><th></th></tr></thead><tbody>'+
+  list.map(function(t){
+    var d=Math.abs(dif(t.endDate));var msg='السلام عليكم '+t.name+'، نود تذكيركم بإيجار العقار '+t.unit+' ('+t.type+'). المبلغ المستحق '+fmt(t.remaining)+' ريال. شكراً';
+    return '<tr class="'+rc(t.type)+'"><td><strong>'+t.unit+'</strong></td><td><span class="'+tc(t.type)+'">'+tIco(t.type)+' '+t.type+'</span></td><td>'+t.name+'</td><td>'+fmt(t.rent)+' ﷼</td>'+
+    '<td style="color:var(--err);font-weight:800">'+fmt(t.remaining)+' ﷼</td><td><span class="bdg '+(d>60?'bdg-err':d>30?'bdg-warn':'bdg-info')+'">'+d+' يوم</span></td>'+
+    '<td style="display:flex;gap:3px"><button class="btn-sm" onclick="qR(\''+t.unit+'\')">💳</button><button class="btn-wa" onclick="cpWA(\''+msg.replace(/'/g,"\\'")+'\')" >📱</button></td></tr>';
+  }).join('')+'</tbody></table>';
+}
+function cpWA(msg){try{navigator.clipboard.writeText(msg).then(function(){alert('✅ تم نسخ رسالة الواتساب');});}catch(e){prompt('انسخ:',msg);}}
+
+// ─── ALERTS ─────────────────────────────────────────────────────
+function rnAlert(){
+  var exp=tens.filter(function(t){return dif(t.endDate)<0&&t.remaining>0;}).sort(function(a,b){return dif(a.endDate)-dif(b.endDate);});
+  var soon=tens.filter(function(t){return dif(t.endDate)>=0&&dif(t.endDate)<=14;}).sort(function(a,b){return dif(a.endDate)-dif(b.endDate);});
+  var h='';
+  if(exp.length){h+='<div style="font-size:13px;font-weight:800;color:var(--err);margin-bottom:7px">🔴 منتهية ('+exp.length+')</div>';exp.forEach(function(t){h+='<div class="ac red"><span class="'+tc(t.type)+'">'+tIco(t.type)+'</span><div style="flex:1"><strong>'+t.unit+'</strong> — '+t.name+'<br><span style="font-size:11px;color:var(--err);font-weight:700">تأخر '+Math.abs(dif(t.endDate))+' يوم — '+fmt(t.remaining)+' ﷼</span></div><button class="btn-sm" onclick="qR(\''+t.unit+'\')">سجل</button></div>';});}
+  if(soon.length){h+='<div style="font-size:13px;font-weight:800;color:var(--warn);margin:12px 0 7px">🟡 تنتهي خلال 14 يوم ('+soon.length+')</div>';soon.forEach(function(t){h+='<div class="ac yl"><span class="'+tc(t.type)+'">'+tIco(t.type)+'</span><div style="flex:1"><strong>'+t.unit+'</strong> — '+t.name+'<br><span style="font-size:11px;color:var(--warn);font-weight:700">ينتهي '+t.endDate+'</span></div><button class="btn-sm" onclick="qR(\''+t.unit+'\')">جدد</button></div>';});}
+  if(!h)h='<div class="empty">✅<br>لا توجد تنبيهات</div>';
+  document.getElementById('altB').innerHTML=h;
+}
+
+// ─── REPORT ─────────────────────────────────────────────────────
+function rnReport(){
+  var labels=[],data=[];
+  for(var i=29;i>=0;i--){var dd=new Date(TODAY);dd.setDate(dd.getDate()-i);var ds=dd.toISOString().split('T')[0];labels.push(ds.slice(5));data.push(pays.filter(function(p){return p.date===ds;}).reduce(function(s,p){return s+p.paid;},0));}
+  var ctx=document.getElementById('cBar').getContext('2d');if(cB)cB.destroy();
+  cB=new Chart(ctx,{type:'bar',data:{labels:labels,datasets:[{data:data,backgroundColor:'rgba(108,92,231,.7)',borderRadius:4}]},options:{plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:8},maxRotation:45}},y:{ticks:{font:{size:9}}}},responsive:true,maintainAspectRatio:false}});
+  var tps=['غرفة','شقة','محل'];var td2=tps.map(function(ty){return pays.filter(function(p){return p.type===ty;}).reduce(function(s,p){return s+p.paid;},0);});
+  var ctx2=document.getElementById('cPie').getContext('2d');if(cP)cP.destroy();
+  cP=new Chart(ctx2,{type:'doughnut',data:{labels:tps,datasets:[{data:td2,backgroundColor:['rgba(29,78,216,.8)','rgba(14,116,144,.8)','rgba(91,33,182,.8)'],borderWidth:0}]},options:{plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:12}}},responsive:true,maintainAspectRatio:false,cutout:'60%'}});
+  var tot=pays.reduce(function(s,p){return s+p.paid;},0);var totDue=tens.filter(function(t){return t.remaining>0&&dif(t.endDate)<0;}).reduce(function(s,t){return s+t.remaining;},0);
+  document.getElementById('rSts').innerHTML='<div class="sc"><div class="sc-lbl">إجمالي التحصيل</div><span class="sc-val g">'+fmt(tot)+' ﷼</span></div><div class="sc"><div class="sc-lbl">عدد الدفعات</div><span class="sc-val b">'+pays.length+'</span></div><div class="sc"><div class="sc-lbl">إجمالي المتأخرات</div><span class="sc-val r">'+fmt(totDue)+' ﷼</span></div><div class="sc"><div class="sc-lbl">المستأجرون</div><span class="sc-val p">'+tens.length+'</span></div>';
+}
+
+// ─── ARCHIVE ────────────────────────────────────────────────────
+function opArch(){var n=new Date();document.getElementById('aN').value=MNS[n.getMonth()]+' '+n.getFullYear();document.getElementById('aNo').value='';document.getElementById('archMod').classList.add('show');}
+function doArch(){
+  var nm=document.getElementById('aN').value.trim();if(!nm){alert('أدخل اسم الشهر');return;}
+  arcs.push({id:Date.now(),name:nm,notes:document.getElementById('aNo').value.trim(),date:TODAY,payments:pays.slice(),summary:{tot:pays.reduce(function(s,p){return s+p.paid;},0),cnt:pays.length,due:tens.filter(function(t){return t.remaining>0&&dif(t.endDate)<0;}).length}});
+  svA();pays=[];sv();cm('archMod');fillMonthSel();rnSts();go('archive');alert('✅ تم أرشفة "'+nm+'"');
+}
+function rnArch(){
+  var b=document.getElementById('archB');
+  if(!arcs.length){b.innerHTML='<div class="empty">🗄️<br>لا توجد أرشيفات</div>';return;}
+  b.innerHTML=arcs.slice().reverse().map(function(a){
+    return '<div class="card" style="border-right:4px solid var(--lav)">'+
+    '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px;margin-bottom:10px">'+
+    '<div><div style="font-size:14px;font-weight:900">📦 '+a.name+'</div><div style="font-size:11px;color:var(--txt3);font-weight:700">'+a.date+(a.notes?' — '+a.notes:'')+'</div></div>'+
+    '<div style="display:flex;gap:5px"><button class="btn btn-sky" style="font-size:11px;padding:4px 10px" onclick="exArc('+a.id+')">⬇️ تصدير</button><button class="btn-del" onclick="dlArc('+a.id+')">🗑️</button></div></div>'+
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px">'+
+    '<div style="background:#ECFDF5;border:1px solid #6EE7B7;border-radius:7px;padding:9px 12px"><div style="font-size:10px;color:var(--ok);font-weight:700">التحصيل</div><div style="font-size:16px;font-weight:900;color:var(--ok)">'+fmt(a.summary.tot)+' ﷼</div></div>'+
+    '<div style="background:#EFF6FF;border:1px solid #93C5FD;border-radius:7px;padding:9px 12px"><div style="font-size:10px;color:var(--room-t);font-weight:700">الدفعات</div><div style="font-size:16px;font-weight:900;color:var(--room-t)">'+a.summary.cnt+'</div></div>'+
+    '<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:7px;padding:9px 12px"><div style="font-size:10px;color:var(--err);font-weight:700">متأخرون</div><div style="font-size:16px;font-weight:900;color:var(--err)">'+a.summary.due+'</div></div>'+
+    '</div></div>';
+  }).join('');
+}
+function exArc(id){var a=arcs.find(function(x){return x.id===id;});if(!a)return;var rows=[['العقار','المستأجر','النوع','المدفوع','الطريقة','التاريخ']];a.payments.forEach(function(p){rows.push([p.unit,p.type||'',p.name,p.paid,p.method,p.date]);});var csv='\uFEFF'+rows.map(function(r){return r.map(function(c){return '"'+c+'"';}).join(',');}).join('\n');var el=document.createElement('a');el.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);el.download='أرشيف_'+a.name.replace(/\s/g,'_')+'.csv';el.click();}
+function dlArc(id){if(!confirm('حذف؟'))return;arcs=arcs.filter(function(x){return x.id!==id;});svA();rnArch();}
+
+// ─── RESET ──────────────────────────────────────────────────────
+function openRst(){document.getElementById('rstMod').classList.add('show');}
+function doRst(){
+  var rP=document.getElementById('rP').checked,rB=document.getElementById('rB').checked,rA=document.getElementById('rA').checked;
+  if(!rP&&!rB&&!rA){alert('اختر عنصراً');return;}if(!confirm('متأكد؟'))return;
+  if(rA){pays=[];tens=RAW.map(function(t){return Object.assign({},t);});}
+  else{if(rP)pays=[];if(rB)tens.forEach(function(t){var r=RAW.find(function(x){return x.unit===t.unit;});if(r){t.remaining=r.remaining;t.endDate=r.endDate;}});}
+  sv();cm('rstMod');rnSts();['rP','rB','rA'].forEach(function(id){document.getElementById(id).checked=false;});alert('✅ تم');
+}
+
+// ─── BACKUP ─────────────────────────────────────────────────────
+function expBak(){var d={v:4,date:TODAY,tens:tens,pays:pays,arcs:arcs};var a=document.createElement('a');a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(d,null,2));a.download='نسخة_'+TODAY+'.json';a.click();}
+function impBak(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){try{var d=JSON.parse(ev.target.result);if(!d.tens)throw new Error('invalid');tens=d.tens;pays=d.pays||[];if(d.arcs)arcs=d.arcs;sv();svA();rnSts();fillMonthSel();alert('✅ تم الاستيراد: '+tens.length+' مستأجر');}catch(err){alert('❌ '+err.message);}};r.readAsText(f);e.target.value='';}
+
+// ─── GOOGLE SHEETS ──────────────────────────────────────────────
+function openGS(){document.getElementById('gsU').value=gsUrl;document.getElementById('gsS').textContent='';document.getElementById('gsMod').classList.add('show');}
+function svGS(){gsUrl=document.getElementById('gsU').value.trim();lsS('rg',gsUrl);cm('gsMod');updateGsLabel();alert(gsUrl?'✅ تم حفظ الرابط':'تم إزالة الرابط');}
+function tstGS(){var u=document.getElementById('gsU').value.trim();if(!u){alert('أدخل الرابط');return;}fetch(u,{method:'POST',body:JSON.stringify({unit:'TEST',name:'اختبار',type:'اختبار',paid:0,method:'اختبار',renewal:'',newEnd:'',date:TODAY})}).then(function(){document.getElementById('gsS').innerHTML='<span style="color:var(--ok);font-weight:700">✅ الاتصال ناجح!</span>';}).catch(function(){document.getElementById('gsS').innerHTML='<span style="color:var(--err);font-weight:700">❌ تعذر الاتصال</span>';});}
+function sndGS(p){if(!gsUrl)return;fetch(gsUrl,{method:'POST',body:JSON.stringify({unit:p.unit,name:p.name,type:p.type,paid:p.paid,method:p.method,renewal:p.rm>0?mLbl(p.rm):'',newEnd:p.newEnd||'',date:p.date})}).catch(function(){});}
+function updateGsLabel(){var el=document.querySelector('.sbb:nth-child(3)');if(el)el.textContent=gsUrl?'🟢 Sheets':'🔗 Sheets';}
+
+// ─── SOUND & ANIM ───────────────────────────────────────────────
+function plySnd(){try{var ctx=new(window.AudioContext||window.webkitAudioContext)();[523,659,784].forEach(function(f,i){var o=ctx.createOscillator();var g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=f;o.type='sine';g.gain.setValueAtTime(0,ctx.currentTime+i*.13);g.gain.linearRampToValueAtTime(.14,ctx.currentTime+i*.13+.05);g.gain.linearRampToValueAtTime(0,ctx.currentTime+i*.13+.22);o.start(ctx.currentTime+i*.13);o.stop(ctx.currentTime+i*.13+.25);});}catch(e){}}
+function shAnim(msg,sub){var o=document.getElementById('sa');var inn=document.getElementById('sain');document.getElementById('samsg').textContent=msg;document.getElementById('sasub').textContent=sub;o.style.display='flex';setTimeout(function(){inn.style.transform='scale(1)';inn.style.opacity='1';},10);if(navigator.vibrate)navigator.vibrate([80,40,80]);setTimeout(function(){inn.style.transform='scale(0)';inn.style.opacity='0';},2200);setTimeout(function(){o.style.display='none';},2600);}
+
+// ─── HELPERS ────────────────────────────────────────────────────
+function shareWA(){
+  if(!curR)return;
+  var p=curR;
+  var msg='*سند قبض إيجار*\n';
+  msg+='━━━━━━━━━━━━━━━━\n';
+  msg+='🏢 رقم العقار: *'+p.unit+'*\n';
+  msg+='👤 المستأجر: *'+p.name+'*\n';
+  msg+='🏷️ النوع: '+p.type+'\n';
+  msg+='💰 المبلغ المدفوع: *'+fmt(p.paid)+' ﷼*\n';
+  msg+='💳 طريقة الدفع: '+p.method+'\n';
+  if(p.newRem>0)msg+='📌 المتبقي: '+fmt(p.newRem)+' ﷼\n';
+  else msg+='✅ مسدد بالكامل\n';
+  msg+='📅 تاريخ الدفع: '+p.date+'\n';
+  if(p.rm>0)msg+='🔄 مدة التجديد: '+mLbl(p.rm)+'\n';
+  if(p.newEnd&&p.rm>0)msg+='📆 نهاية القسط: '+p.newEnd+'\n';
+  if(p.notes)msg+='📝 ملاحظات: '+p.notes+'\n';
+  msg+='━━━━━━━━━━━━━━━━\n';
+  msg+='نظام الإيجارات — Azzam';
+  var url='https://wa.me/?text='+encodeURIComponent(msg);
+  window.open(url,'_blank');
+}
+function toggleSb(){
+  var sb=document.querySelector('.sb');
+  var main=document.querySelector('.main');
+  var btn=document.getElementById('sbToggle');
+  var isHidden=sb.classList.toggle('hidden');
+  main.style.marginRight=isHidden?'0':'210px';
+  btn.textContent=isHidden?'▶':'☰';
+}
+function impXlsx(e){
+  var file=e.target.files[0];if(!file)return;
+  var r=new FileReader();
+  r.onload=function(ev){
+    try{
+      // Parse CSV or detect xlsx
+      var txt=ev.target.result;
+      var lines=txt.split('\n').filter(function(l){return l.trim();});
+      var imported=0;var skipped=0;
+      lines.forEach(function(line,idx){
+        if(idx===0)return; // skip header
+        var cols=line.split('\t');
+        if(cols.length<11)return;
+        // Extract fields based on Excel structure
+        var unitRaw=(cols[0]||'').trim().replace(/^م\s*\+?\s*/,'').replace(/\s*\+\s*/,'-').trim();
+        var rent=parseFloat(cols[1])||0;
+        var endDateNum=parseFloat(cols[4])||0;
+        var remaining=parseFloat(cols[9])||0;
+        var nameRaw=(cols[10]||'').trim();
+        // Skip empty or section header rows
+        if(!unitRaw||!nameRaw||isNaN(rent)||nameRaw==='0'||nameRaw.includes('عمارة')||nameRaw.includes('شقق')||nameRaw.includes('محلات'))return;
+        // Convert Excel date number to ISO date
+        var endDate=TODAY;
+        if(endDateNum>40000&&endDateNum<60000){
+          endDate=xl(endDateNum);
+        }
+        // Detect type by unit number range
+        var unitNum=parseInt(unitRaw);
+        var type='غرفة';
+        if(unitNum>=109&&unitNum<=120)type='شقة';
+        else if(['3','4','5-6','10','11','13-14','54-58','55-57','60-62','63','64-59','1+2+7+8+9'].indexOf(unitRaw)>=0)type='محل';
+        // Update existing or add new
+        var existing=gT(unitRaw);
+        if(existing){
+          existing.name=nameRaw;
+          existing.rent=rent;
+          existing.remaining=remaining;
+          if(endDate!==TODAY)existing.endDate=endDate;
+          imported++;
+        } else {
+          tens.push({unit:unitRaw,name:nameRaw,rent:rent,remaining:remaining,endDate:endDate,type:type,phone:'',idNum:'',contract:'',entryDate:'',startDate:'',notes:''});
+          imported++;
+        }
+      });
+      sv();rnSts();
+      alert('✅ تم استيراد '+imported+' مستأجر بنجاح!');
+    }catch(err){alert('❌ خطأ: '+err.message);}
+  };
+  // Try reading as text (works for CSV/TSV)
+  r.readAsText(file,'utf-8');
+  e.target.value='';
+}
+function shMsg(id,txt,cls){var el=document.getElementById(id);el.className='msg '+cls;el.textContent=txt;el.style.display='block';setTimeout(function(){el.style.display='none';},5000);}
+function cm(id){document.getElementById(id).classList.remove('show');}
+function qR(u){go('reg');document.getElementById('fU').value=u;fT();}
+function opRcpt(p){
+  if(!p)return;curR=p;
+  var rows=[['رقم العقار',p.unit],['المستأجر',p.name],['النوع',p.type||'-'],['المبلغ المدفوع',fmt(p.paid)+' ﷼'],['طريقة الدفع',p.method],['التاريخ',p.date]];
+  if(p.newRem>0) rows.push(['المتبقي',fmt(p.newRem)+' ﷼']);
+  else rows.push(['الحالة','مسدد بالكامل ✅']);
+  if(p.rm>0){rows.push(['التجديد',mLbl(p.rm)]);rows.push(['نهاية القسط الجديدة',p.newEnd]);}
+  if(p.notes)rows.push(['ملاحظات',p.notes]);
+  document.getElementById('rRows').innerHTML=rows.map(function(r){return '<div class="rrow"><span style="color:#333333;font-size:11px;font-weight:800">'+r[0]+'</span><span style="font-weight:800">'+r[1]+'</span></div>';}).join('');
+  document.getElementById('rAmt').textContent=fmt(p.paid)+' ﷼';
+  var sc=p.newRem===0?'var(--ok)':'var(--warn)';
+  var st=document.getElementById('rStamp');st.textContent=p.newRem===0?'مسدد':'جزئي';st.style.borderColor=sc;st.style.color=sc;
+  document.getElementById('rFoot').innerHTML='وثيقة رسمية | '+TODAY+' | '+p.id;
+  document.getElementById('rcptMod').classList.add('show');
+}
+function prRcpt(){
+  var pa=document.createElement('div');pa.id='pArea';
+  pa.style.cssText='position:fixed;inset:0;background:#fff;z-index:99999;overflow:auto;padding:20px;direction:rtl;font-family:Tajawal,sans-serif';
+  pa.innerHTML=document.getElementById('rcptC').innerHTML;document.body.appendChild(pa);window.print();
+  setTimeout(function(){document.body.removeChild(pa);},1000);
+}
+</script>
+</body>
+</html>
